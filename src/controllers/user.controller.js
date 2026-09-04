@@ -88,7 +88,7 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImage: coverImage?.url || "",
     email,
     password,
-    username: username.toLowerCase,
+    username: username.toLowerCase(),
   });
 
   const createdUser = await User.findById(user._id).select(
@@ -193,6 +193,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRequestToken =
     req.cookies.refreshToken || req.body.refreshToken;
 
+  console.log("incomingRequestToken : ", incomingRequestToken);
+  
+
+
   if (!incomingRequestToken) {
     throw new ApiError(401, "Unauthorized request");
   }
@@ -228,7 +232,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          { accessToken, refreshToken },
+          { accessToken, newRefreshToken },
           "Access token refreshed"
         )
       );
@@ -239,8 +243,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
+  console.log("oldPassword: ", oldPassword)
 
   const user = await User.findById(req.user?._id);
+  console.log("user : ", user);
+  
   const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
   if (!isPasswordCorrect) {

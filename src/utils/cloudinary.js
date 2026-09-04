@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import console from "console";
 import fs from "fs";
 
 
@@ -11,6 +12,7 @@ cloudinary.config({
 const uploadOnCloudinary = async (localFilePath) => {
     try {
         if(!localFilePath) return null
+        
         //upload the file on cloudinary
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto"
@@ -25,18 +27,25 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 }
 
-const deleteOldImageOnCloudinary = async (publicId) => {
+const deleteOnCloudinary = async (publicId) => {
   try {
       if(!publicId) return null;
+
      
-    const resposne = await cloudinary.uploader.destroy(publicId,
+      const cleanedPublicId = publicId.split("/").pop().split(".")[0]
+        console.log("cleanedPublicId ::::", cleanedPublicId)
+
+     
+    const response = await cloudinary.uploader.destroy(cleanedPublicId,
         {
-            resource_type: 'auto',
+            resource_type: 'image',
             invalidate: true
         }
         
     )
-    return resposne
+
+    console.log("image deleted on cloudinary", response)
+    return response
   } catch (error) {
     
     console.log("error while deleting the image on cloudinary", error.message)
@@ -46,5 +55,5 @@ const deleteOldImageOnCloudinary = async (publicId) => {
 
 export {
     uploadOnCloudinary, 
-    deleteOldImageOnCloudinary
+    deleteOnCloudinary
 }

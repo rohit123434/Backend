@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import {
-  deleteOldImageOnCloudinary,
+  deleteOnCloudinary,
   uploadOnCloudinary,
 } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -193,7 +193,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   const incomingRequestToken =
     req.cookies.refreshToken || req.body.refreshToken;
 
-  console.log("incomingRequestToken : ", incomingRequestToken);
+  // console.log("incomingRequestToken : ", incomingRequestToken);
   
 
 
@@ -243,7 +243,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  console.log("oldPassword: ", oldPassword)
+  // console.log("oldPassword: ", oldPassword)
 
   const user = await User.findById(req.user?._id);
   console.log("user : ", user);
@@ -270,32 +270,36 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, email } = req.body;
-
+   
   if (!(fullName || email)) {
     throw new ApiError(400, "All fields are required");
   }
 
-  const user = User.findByIdAndUpdate(
-    req.user._id,
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
     {
       $set: {
         fullName,
-        email,
+        email: email,
       },
     },
     { new: true }
   ).select("-password");
+ 
 
   return res
     .status(200)
     .json(
-      new ApiResponse(200, req.user, "Account details updated successfully")
+      new ApiResponse(200, user, "Account details updated successfully")
     );
 });
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalpath = req.file?.path;
-  // const oldAvatarUrl = req.user?.avatar.url
+  const oldAvatarUrl = req.user?.avatar
+
+  console.log("oldAvatarUrl ::", oldAvatarUrl);
+  
 
   if (!avatarLocalpath) {
     throw new ApiError(400, "avatar file is missing");
@@ -317,10 +321,10 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     { new: true }
   ).select("password");
 
-  // if (oldAvatarUrl) {
-  //   const publicId = oldAvatarUrl
-  //   await deleteOldImageOnCloudinary(publicId)
-  // }
+  if (oldAvatarUrl) {
+    
+    await deleteOnCloudinary(oldAvatarUrl)
+  }
 
   return res
     .status(200)

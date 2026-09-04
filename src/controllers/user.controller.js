@@ -1,7 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { deleteOldImageOnCloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
 
@@ -285,6 +285,8 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 const updateUserAvatar = asyncHandler(async (req, res) => {
   
   const avatarLocalpath = req.file?.path
+  // const oldAvatarUrl = req.user?.avatar.url
+  
 
   if (!avatarLocalpath) {
     throw new ApiError(400, "avatar file is missing")
@@ -305,6 +307,11 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     },
     {new: true}
   ).select("password")
+
+  // if (oldAvatarUrl) {
+  //   const publicId = oldAvatarUrl
+  //   await deleteOldImageOnCloudinary(publicId)
+  // }
 
   return res
   .status(200)

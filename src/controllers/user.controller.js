@@ -237,7 +237,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-const changeCurrentUser = asyncHandler(async (req, res) => {
+const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newpassword } = req.body;
 
   const user = await User.findById(req.user?._id);
@@ -477,7 +477,7 @@ export {
   loginUser,
   logoutUser,
   refreshAccessToken,
-  changeCurrentUser,
+  changeCurrentPassword,
   getCurrentUser,
   updateAccountDetails,
   updateUserAvatar,
